@@ -1,0 +1,240 @@
+
+/* */
+
+#lookup-search-results-table td {
+	border-top: thin solid #BCBCBC;
+}
+
+
+#search-results-div {
+	display: none;
+}
+
+#emails-input {
+	width:100%;
+	height:60px;
+	background-color:#efefee;
+
+}
+
+#emails-input-results {
+	width:100%
+	height:60px;
+	background-color:#efefee;
+}
+
+#manageGroups {
+	position:relative;
+    float:right;
+}
+
+#hu-groups-tabs {
+	
+}
+
+#groups-content {
+	margin-top: 10px;
+}
+
+
+.pic img {
+	height: 50px;
+	width: 50px;
+}
+
+.huheadbar {
+	border:0;
+	height:10px; 
+	color: #c29e47; 
+	background-color: #c29e47;
+	margin-right: 20px;
+	margin-bottom: 20px;
+	
+}
+
+.hudivider {
+
+	border:0;
+        height:4px;
+        color: #c29e47;
+        background-color: #c29e47;
+	margin-right: 20px;
+	margin-bottom: 20px;
+}
+
+
+#groupsmanlink {
+	float:right;border:1px solid #999;padding:3px 6px;display:block;
+        background-color:#dfefff;
+	margin-right: 6px;
+}
+
+#groupsmanlink a {
+	text-decoration:none;
+	color: #333;
+}
+
+input[type="button"] {
+	background-color:#dfefff;
+}
+
+input[type="submit"] {
+        background-color:#dfefff;
+}
+
+#searchresults {
+	background-color: #fefeef;
+	padding-left: 20px;
+}
+
+.entitysearchresults {
+	width:100%;
+}
+
+.husmalltext {
+	font-size:.9em;color:#68d;
+}
+
+.husubmitbut {
+       background-color:#dfefff;
+}
+
+
+
+fieldset
+{
+     border: 1px solid #BCBCBC;
+     padding: 5px;
+}
+
+.permsbuttoncontainer{
+	padding-top: 8px;
+	padding-bottom: 8px;
+ 	margin-right:20px;margin-left:20px;
+}
+input[type="radio"] {
+    -webkit-appearance: checkbox;
+    -moz-appearance: checkbox;
+    -ms-appearance: checkbox;     /* not currently supported */
+    -o-appearance: checkbox;      /* not currently supported */
+}
+
+.permssub {
+	font-size: 14pt;
+	padding: 20px;
+}
+
+.blogpermtxt {
+	font-size: 12pt;
+	padding: 20px;
+}
+
+#hugrouplist {
+	/*padding-top:24px;
+	padding-bottom:30px;*/
+	width:98%
+}	
+
+#content {
+	margin-left: 20px;
+}
+#full-height-container{
+	overflow:auto;
+}
+#hupopupheader{
+	height:10px;
+}
+#tabs {
+	padding-top:10px;
+	border: thin solid lightgray;
+}
+
+/*
+#777061
+*/
+
+tabs-1, tabs-2, tabs-3, tabs-4 {
+	font-size: .9em;
+}
+#hu-perm-plugin {
+	width: 100%;
+}
+
+
+#viewCurrentBlogsList {
+	/*border: thin solid lightgray;*/
+	margin-left: 20px;
+}
+
+#viewCurrentUsersList {
+	
+	margin-left: 20px;
+}
+
+h2 {
+	margin-left: 20px;
+	}
+
+#description {
+	vertical-align: top;
+	margin-left: 47px;
+}
+
+#addGroupForm {
+	padding: 10px 10px;
+	
+	margin-top: 15px;
+}
+
+.admin { display: none; }
+
+
+.hu-perm-table {
+	border: thin solid lightgray;
+	width: 98%;
+	background-color: #dfefff;
+    font-size: 12px;
+}
+
+.hu-perm-table td {
+	background-color: #fff;
+	text-align: center;
+}
+
+
+.hu-perm-table .names{
+        background-color: #fff;
+        text-align: left;
+		padding-left: 6px;
+		min-width: 30%;
+}
+
+.hu-perm-table .huremoveentity{
+        background-color: #fbeb9a;
+        text-align: center;
+}
+
+#current_groups_table {
+	/*border: thin solid lightgrey;*/
+}
+
+#current_groups_table th td {
+	width: 40px;
+	padding: 2px;
+}
+
+#current_groups_table th  {
+	background: none repeat scroll 0 0 #777061;
+	color: #FFFFFF;
+	padding: 2px;
+}
+
+#current_users_table th td {
+	padding: 2px;
+}
+
+#current_users_table th  {
+	background: none repeat scroll 0 0 #777061;
+	color: #FFFFFF;
+	padding: 2px;
+}
