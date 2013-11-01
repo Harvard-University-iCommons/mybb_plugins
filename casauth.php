@@ -6,13 +6,18 @@
  * Website: http://icyboards.com
  */
  
- /*
+/*
+ List of Templates modified for CAS auth. This is optional, but it makes it look better and
+ removes choices from end users that would be confusing because we are not using the built in method 
+ of creating user accounts. 
+ 
  header
  header_welcomeblock_guest
  header_welcomeblock_member
  usercp_nav_editsignature
  usercp_nav_profile
  usercp_nav_misc
+ 
  */
  
 session_start();
@@ -47,33 +52,75 @@ if(isset($_GET['ticket'])) {
 		$_SESSION['encryptedid'] = $encryptedid;
 		$_SESSION['externalid'] = $externalid;
 		
-		//error_log($externalid . ' : ' . $encryptedid);
-		
-		// query to look in the database to see if the user already has an account
-		
-		//$sql = "SELECT iserid FROM ".TABLE_PREFIX."userlookup where externalid='".strtolower($encryptedid)."'";
 		$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($encryptedid)) . "'");
 		$userid = $db->fetch_field($user_query, "userid");
 		
 		$query = $db->simple_select("users", "*", "LOWER(username)='$userid'");
-		
-		//$query = $db->simple_select("userlookup", "*", "LOWER(externalid)='" . $db->escape_string(strtolower($externalid)) . "'");
-		
-		//$sql = "SELECT * FROM ".TABLE_PREFIX."userlookup where externalid='".strtolower($encryptedid)."'";
-		//error_log($sql);
-		
-		//$query = $db->query($sql);
-		
-		error_log("count=".$db->num_rows($query));
-		
+				
 		// check to see if the user already has an account in myBB
 		if($db->num_rows($query) == 0) {
 			error_log('user does not exist');
+			
 			// if the user does not have an account, let's create one
 			if($mybb->settings['icycascreatenewaccounts']) {
-				eval("\$casregister = \"".$templates->get("member_cas_signup")."\";");
-				output_page($casregister);
-			
+					
+					require_once MYBB_ROOT."inc/datahandlers/user.php";		
+					if(!isset($mybb->input['username'])) icycas_member_login();
+					if($mybb->settings['icycascreatenewaccounts'] == "no") icycas_member_login();
+	
+					$userhandler = new UserDataHandler("insert");
+					$password = random_str();
+
+					// add the new user to the userlookup table
+					$sql = "INSERT INTO ".TABLE_PREFIX."userlookup (externalid) values('".$encryptedid."');";
+					$db->write_query($sql);
+					
+					// get the new userid from the userlookup table, this will be the username in mybb.
+					$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($encryptedid)) . "'");
+					$userid = $db->fetch_field($user_query, "userid");
+					
+					print_r('userid='.$userid.'<br />');
+					
+					$user = array(
+						"username" => $userid, 
+						"usertitle" => $userfullname,
+						"password" => $password,
+						"password2" => $password,
+						"email" => $useremail,
+						"email2" => $useremail,
+						"usergroup" => (int)$mybb->settings['icycasnewaccountgid'],
+						"referrer" => "",
+						"timezone" => 0,
+						"language" => "",
+						"profile_fields" => "",
+						"regip" => $session->ipaddress,
+						"longregip" => my_ip2long($session->ipaddress),
+						"coppa_user" => 0
+					);
+					
+					$option_value = 0;
+					$user['options'] = array(
+						"allownotices" => $option_value,
+						"hideemail" => $option_value,
+						"subscriptionmethod" => $option_value,
+						"receivepms" => $option_value,
+						"pmnotice" => $option_value,
+						"emailpmnotify" => $option_value,
+						"invisible" => $option_value,
+						"dstcorrection" => $option_value
+					);
+	
+					$userhandler->set_data($user);
+					if(!$userhandler->validate_user()) {
+						$regerrors = inline_error($userhandler->get_friendly_errors());
+						print_r('Hello -> '.$regerrors. '<br />');
+					} else {
+						$user_info = $userhandler->insert_user();
+						// Save the external id and try the CAS request again...
+						$db->update_query("users", array("externalid" => $db->escape_string($encryptedid)), "username='" . $db->escape_string($mybb->input['username']) . "'");
+						icycas_member_login();
+					}
+				
 			} else {
 				error($lang->cas_no_matching_accounts);
 			}
@@ -120,76 +167,14 @@ if(isset($_GET['ticket'])) {
 			redirect("index.php", $lang->redirect_loggedin);
 		}
 	} else {
+	
 		error($lang->cas_ticket_validate_error);
+	
 	}
-}
+	
+} else {
 
-// They must be registering
-elseif(isset($_POST['username'])) {
-	require_once MYBB_ROOT."inc/datahandlers/user.php";
-	error_log('username='.$mybb->input['username']);
-	if(!isset($mybb->input['username'])) icycas_member_login();
-	if($mybb->settings['icycascreatenewaccounts'] == "no") icycas_member_login();
-	
-	print_r(var_dump($_SESSION));
-	
-	$userhandler = new UserDataHandler("insert");
-	$password = random_str();
-	
-	$externalid = $_SESSION['encryptedid'];
-	error_log('From Session: '.$externalid);
-	$sql = "INSERT INTO ".TABLE_PREFIX."userlookup (externalid) values('".$externalid."');";
-	error_log($sql);
-	$db->write_query($sql);
-	$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($externalid)) . "'");
-	$userid = $db->fetch_field($user_query, "userid");
-	
-	$user = array(
-		"username" => $userid, 
-		"usertitle" => $_SESSION['userfullname'],
-		"password" => $password,
-		"password2" => $password,
-		"email" => $mybb->input['email'],
-		"email2" => $mybb->input['email2'],
-		"usergroup" => (int)$mybb->settings['icycasnewaccountgid'],
-		"referrer" => "",
-		"timezone" => 0,
-		"language" => "",
-		"profile_fields" => "",
-		"regip" => $session->ipaddress,
-		"longregip" => my_ip2long($session->ipaddress),
-		"coppa_user" => 0
-	);
-	
-	$user['options'] = array(
-		"allownotices" => $mybb->input['allownotices'],
-		"hideemail" => $mybb->input['hideemail'],
-		"subscriptionmethod" => $mybb->input['subscriptionmethod'],
-		"receivepms" => $mybb->input['receivepms'],
-		"pmnotice" => $mybb->input['pmnotice'],
-		"emailpmnotify" => $mybb->input['emailpmnotify'],
-		"invisible" => $mybb->input['invisible'],
-		"dstcorrection" => $mybb->input['dstcorrection']
-	);
-	
-	$userhandler->set_data($user);
-	error_log('here');
-	if(!$userhandler->validate_user()) {
-	    
-		$regerrors = inline_error($userhandler->get_friendly_errors());
-		error_log('Hello -> '.$regerrors);
-		$externalid = $_SESSION['encryptedid'];
-		eval("\$casregister = \"".$templates->get("member_cas_signup")."\";");
-		output_page($casregister);
-	} else {
-		$user_info = $userhandler->insert_user();
-		error_log('user inserted...');
-		// Save the external id and try the CAS request again...
-		$db->update_query("users", array("externalid" => $db->escape_string($_SESSION['encryptedid'])), "username='" . $db->escape_string($mybb->input['username']) . "'");
-		icycas_member_login();
-	}
-}
-
-else
 	icycas_member_login();
+
+}
 ?>
