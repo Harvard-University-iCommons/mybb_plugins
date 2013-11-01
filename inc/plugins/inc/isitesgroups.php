@@ -1,10 +1,15 @@
 <?php
 
-//if(isset($_SESSION['externalid'])){
-	$go = getUserAdminGroups($_SESSION['externalid']);
+// Disallow direct access to this file for security reasons
+if(!defined("IN_MYBB"))
+{
+	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
+}
 
-//error_log($go);
+// call the icommonsapi method to get a list of the users admin groups. these are groups which the user has admin access. 
+$go = getUserAdminGroups($_SESSION['externalid']);
 
+// output the list of groups and the group select form.
 $str = <<<EOD
 <link href="/inc/plugins/inc/groupmenu.css" type="text/css" rel="stylesheet">
 <!--<link href="/inc/plugins/inc/hu-permissions.css" type="text/css" rel="stylesheet">-->
@@ -42,10 +47,5 @@ $str = <<<EOD
 		</div>
 	</div>
 EOD;
-	
-//}
-//else {
-//	$str='You are not authorized to view this screen';
-//}
 
 ?>
