@@ -19,12 +19,18 @@
  usercp_nav_misc
  
  */
- 
+
 session_start();
 define("IN_MYBB", 1);
 define("THIS_SCRIPT", "casauth.php");
 
-require_once MYBB_ROOT."global.php";
+require_once "./global.php";
+
+if(!defined('MYBB_ROOT'))
+{
+	define('MYBB_ROOT', dirname(dirname(__FILE__))."/");
+}
+
 require_once MYBB_ROOT."inc/plugins/inc/icommonsapi.php";
 
 if(!$db->field_exists("externalid", "users")) die("Error: Plugin Not Enable");
@@ -54,19 +60,19 @@ if(isset($_GET['ticket'])) {
 		
 		$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($encryptedid)) . "'");
 		$userid = $db->fetch_field($user_query, "userid");
-		
 		$query = $db->simple_select("users", "*", "LOWER(username)='$userid'");
 				
 		// check to see if the user already has an account in myBB
 		if($db->num_rows($query) == 0) {
-			error_log('user does not exist');
+			//error_log('user does not exist');
 			
 			// if the user does not have an account, let's create one
 			if($mybb->settings['icycascreatenewaccounts']) {
 					
 					require_once MYBB_ROOT."inc/datahandlers/user.php";		
-					if(!isset($mybb->input['username'])) icycas_member_login();
-					if($mybb->settings['icycascreatenewaccounts'] == "no") icycas_member_login();
+					
+					//if(!isset($mybb->input['username'])) icycas_member_login();
+					//if($mybb->settings['icycascreatenewaccounts'] == "no") icycas_member_login();
 	
 					$userhandler = new UserDataHandler("insert");
 					$password = random_str();
