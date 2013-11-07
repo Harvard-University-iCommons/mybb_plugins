@@ -66,14 +66,10 @@ if(isset($_GET['ticket'])) {
 				
 		// check to see if the user already has an account in myBB
 		if($db->num_rows($query) == 0) {
-			error_log('user does not exist');
-			error_log('create: '.$mybb->settings['icycascreatenewaccounts']);
 			
 			// if the user does not have an account, let's create one
 			if($mybb->settings['icycascreatenewaccounts']) {
-			
-					error_log('ok: '.$mybb->settings['icycascreatenewaccounts']);
-			
+						
 					require_once MYBB_ROOT."inc/datahandlers/user.php";		
 			
 					//if(!isset($mybb->input['username'])) icycas_member_login();
@@ -83,22 +79,13 @@ if(isset($_GET['ticket'])) {
 					$password = random_str();
 
 					// add the new user to the userlookup table
-					$sql = "INSERT INTO ".TABLE_PREFIX."userlookup (externalid) values('".$encryptedid."');";
-					
-					error_log($sql);
-					
+					$sql = "INSERT INTO ".TABLE_PREFIX."userlookup (externalid) values('".$encryptedid."');";					
 					$db->write_query($sql);
-					
-					
 					
 					// get the new userid from the userlookup table, this will be the username in mybb.
 					$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($encryptedid)) . "'");
 					$userid = $db->fetch_field($user_query, "userid");
-					
-					error_log('$userid'.$userid);
-					
-					print_r('userid='.$userid.'<br />');
-					
+															
 					$user = array(
 						"username" => $userid, 
 						"displayname" => $userfullname,
