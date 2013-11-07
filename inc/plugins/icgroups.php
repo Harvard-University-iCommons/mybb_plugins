@@ -10,6 +10,12 @@
  */ 
  
 require_once MYBB_ROOT."inc/plugins/inc/icommonsapi.php";
+
+
+
+
+
+
  
 // Disallow direct access to this file for security reasons
 if(!defined("IN_MYBB"))
@@ -95,6 +101,19 @@ function icgroups_admin_user_groups_begin() {
 function icgroups_admin_user_groups_add() {
 	global $page, $mybb, $db, $usergroup_permissions, $plugins, $cache, $lang;
 	
+	$usericgroup_permissions = array(
+		"isbannedgroup" 	=> 0, "canview" 		=> 1, "canviewthreads" 		=> 1, "canviewprofiles" => 1, "candlattachments" 	=> 1, "canpostthreads" => 1,
+		"canpostreplys" 	=> 1, "canpostattachments" => 1, "canratethreads" 	=> 1, "caneditposts" 	=> 1, "candeleteposts" 		=> 1, "candeletethreads" => 1,
+		"caneditattachments" => 1, "canpostpolls" 	=> 1, "canvotepolls" 		=> 1, "canundovotes" 	=> 0, "canusepms" 			=> 0, "cansendpms" => 0, "cantrackpms" => 0,
+		"candenypmreceipts" => 0, "pmquota" 		=> 200, "maxpmrecipients" 	=> 5, "cansendemail" 	=> 1, "cansendemailoverride" => 0, "maxemails" => 5,
+		"canviewmemberlist" => 1, "canviewcalendar" => 1, "canaddevents" 		=> 1, "canbypasseventmod" => 0, "canmoderateevents"	=> 0, "canviewonline" => 1,
+		"canviewwolinvis" 	=> 0, "canviewonlineips" => 0, "cancp" 				=> 0, "issupermod" 		=> 0, "cansearch" 			=> 1, "canusercp" => 1, "canuploadavatars" => 0,
+		"canratemembers" 	=> 1, "canchangename" 	=> 0, "showforumteam" 		=> 0, "usereputationsystem" => 0, "cangivereputations" => 0, "reputationpower" => 1,
+		"maxreputationsday" => 5, "maxreputationsperuser" => 0, "maxreputationsperthread" 				=> 0, "candisplaygroup" 	=> 1, "attachquota" => 0,
+		"cancustomtitle" 	=> 0, "canwarnusers" 	=> 0, "canreceivewarnings" 	=> 1, "maxwarningsday" 	=> 0, "canmodcp" 			=> 0, "showinbirthdaylist" => 1,
+		"canoverridepm" 	=> 0, "canusesig" 		=> 0, "canusesigxposts" 	=> 0, "signofollow" 	=> 0
+	);
+	
 	$lang->load("icgroups");
 		
 	if(isset($mybb->input['selectedgroups'])) {	
@@ -126,16 +145,38 @@ function icgroups_admin_user_groups_add() {
 				);
 			
 				// create the group with the default mybb group permissions
-				$new_usergroup = array_merge($new_usergroup, $usergroup_permissions);
+				$new_usergroup = array_merge($new_usergroup, $usericgroup_permissions);
 				$plugins->run_hooks("admin_user_groups_add_commit");
 				
 				// check to see if the group already exists
 				$query = $db->simple_select("usergroups", "*", "externalgid='".$group."'");
-				//$usergroup = $db->fetch_array($query);
 				
+				error_log('selecting group '.$group);
+				
+				// the commented out block of code below is for reference only. it shows how to copy
+				// permissions from one group to another. If this ever comes up, you wont have to go
+				// searching for how to do it. 
+				
+				/*
+				if($mybb->input['copyfrom'] == 0)
+				{
+					$new_usergroup = array_merge($new_usergroup, $usergroup_permissions);
+				}
+				// Copying permissions from another group
+				else
+				{
+					$query = $db->simple_select("usergroups", "*", "gid='".intval($mybb->input['copyfrom'])."'");
+					$existing_usergroup = $db->fetch_array($query);
+					foreach(array_keys($usergroup_permissions) as $field)
+					{
+						$new_usergroup[$field] = $existing_usergroup[$field];
+					}
+				}
+				*/
+				print_r($new_usergroup);
 				// if the group does not exist, insert the group into the usergroups table
 				if($db->num_rows($query) == 0){
-			
+					error_log('**************************> check 1');
 					$gid = $db->insert_query("usergroups", $new_usergroup);
 			
 					// Update the caches
@@ -145,11 +186,16 @@ function icgroups_admin_user_groups_add() {
 					// Log admin action
 					log_admin_action($gid, $groupinfo->{'group'}->name);
 				}
+				
+				error_log('**************************> check 2');
 			}
 			else {
+				error_log('**************************> check 4');
 				$page->output_inline_error($errors);
 			}
 		}
+		
+		error_log('**************************> check 3');
 		admin_redirect("index.php?module=user-groups");	
 	}
 }

@@ -15,6 +15,8 @@ $plugins->add_hook("member_do_login_start", "icycas_member_do_login_start");
 $plugins->add_hook("admin_formcontainer_end", "icycas_admin_formcontainer_end");
 $plugins->add_hook("admin_user_users_edit_commit", "icycas_admin_user_users_edit_commit");
 $plugins->add_hook('admin_user_users_delete', 'icycas_admin_user_users_delete_commit');
+$plugins->add_hook('member_logout_end', 'icycas_member_logout_end');
+$plugins->add_hook("pre_output_page", "icycas_pre_output_page");
 
 function icycas_info() {
 	global $lang;
@@ -242,12 +244,13 @@ function icycas_install() {
 
 function icycas_uninstall() {
 	global $db;
-	
+	/*
 	if($db->field_exists("externalid", "users"))
 		$db->write_query("ALTER TABLE " . TABLE_PREFIX . "users DROP externalid");
 	
 	if($db->table_exists(TABLE_PREFIX."userlookup"))
 		$db->drop_table(TABLE_PREFIX."userlookup");
+	*/
 }
 
 function icycas_is_installed() {
@@ -317,9 +320,39 @@ function icycas_admin_user_users_delete_commit() {
 	if($db->num_rows($query) > 0) {
 		$user = $db->fetch_array($query);
 		$db->delete_query("userlookup", "userid='{$user['username']}'");
+		log_admin_action("User {$user['displayname']} deleted.");
 	}
-	error_log('User deleted... '.$user['username']);
+}
+
+function icycas_member_logout_end() {
+	redirect($_SERVER['CAS_LOGOUT_URL']);
+}
+
+/* Replace the users username on the page with their display name.
+ * usernames are 3 digit number such as 110, 117, 125, etc... we don't want to show those
+ * so we replace them with the users display name.
+ */
+function icycas_pre_output_page($page){
+	global $db;
+		
+	preg_match_all("/<a href=\"[^\"]*member.php\?action=profile[^\"]*\">(\d{3,4})\<\/a>/", $page, $matches);
 	
+	//print_r($matches);
+	
+	$userids = $matches[1];
+	$patterns = array();
+	$usertitles = array();
+	foreach($userids as $key=>$id){
+		$patterns[$key] = "/\>".$id ."\<\/a\>/";
+		$query = $db->simple_select("users", "displayname", "username=" . (int)$id);
+		$result = $db->fetch_array($query);
+		$displayname = $result['displayname'];
+		$usertitles[$key] = ">".$displayname."</a>";
+	}
+	
+	$page = preg_replace($patterns, $usertitles, $page);
+	
+	return $page;
 }
 
 ?>

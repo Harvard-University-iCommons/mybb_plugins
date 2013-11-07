@@ -25,6 +25,7 @@ define("IN_MYBB", 1);
 define("THIS_SCRIPT", "casauth.php");
 
 require_once "./global.php";
+//require_once "./inc/init.php";
 
 if(!defined('MYBB_ROOT'))
 {
@@ -60,17 +61,21 @@ if(isset($_GET['ticket'])) {
 		
 		$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($encryptedid)) . "'");
 		$userid = $db->fetch_field($user_query, "userid");
+		
 		$query = $db->simple_select("users", "*", "LOWER(username)='$userid'");
 				
 		// check to see if the user already has an account in myBB
 		if($db->num_rows($query) == 0) {
-			//error_log('user does not exist');
+			error_log('user does not exist');
+			error_log('create: '.$mybb->settings['icycascreatenewaccounts']);
 			
 			// if the user does not have an account, let's create one
 			if($mybb->settings['icycascreatenewaccounts']) {
-					
+			
+					error_log('ok: '.$mybb->settings['icycascreatenewaccounts']);
+			
 					require_once MYBB_ROOT."inc/datahandlers/user.php";		
-					
+			
 					//if(!isset($mybb->input['username'])) icycas_member_login();
 					//if($mybb->settings['icycascreatenewaccounts'] == "no") icycas_member_login();
 	
@@ -79,17 +84,24 @@ if(isset($_GET['ticket'])) {
 
 					// add the new user to the userlookup table
 					$sql = "INSERT INTO ".TABLE_PREFIX."userlookup (externalid) values('".$encryptedid."');";
+					
+					error_log($sql);
+					
 					$db->write_query($sql);
+					
+					
 					
 					// get the new userid from the userlookup table, this will be the username in mybb.
 					$user_query = $db->simple_select("userlookup", "userid", "LOWER(externalid)='" . $db->escape_string(strtolower($encryptedid)) . "'");
 					$userid = $db->fetch_field($user_query, "userid");
 					
+					error_log('$userid'.$userid);
+					
 					print_r('userid='.$userid.'<br />');
 					
 					$user = array(
 						"username" => $userid, 
-						"usertitle" => $userfullname,
+						"displayname" => $userfullname,
 						"password" => $password,
 						"password2" => $password,
 						"email" => $useremail,
@@ -124,6 +136,7 @@ if(isset($_GET['ticket'])) {
 						$user_info = $userhandler->insert_user();
 						// Save the external id and try the CAS request again...
 						$db->update_query("users", array("externalid" => $db->escape_string($encryptedid)), "username='" . $db->escape_string($mybb->input['username']) . "'");
+						error_log('redirecting....');
 						icycas_member_login();
 					}
 				
@@ -162,7 +175,7 @@ if(isset($_GET['ticket'])) {
 			}
 			$additionalgroups = implode(",", $user_local_groups);
 			
-			$db->update_query("users", array("usertitle" => $userfullname), "uid='" . $user['uid'] . "'");
+			$db->update_query("users", array("displayname" => $userfullname), "uid='" . $user['uid'] . "'");
 			
 			// delete all users groups
 			$db->update_query("users", array("additionalgroups" => ""), "uid='" . $user['uid'] . "'");
