@@ -9,7 +9,6 @@
 if(!defined("IN_MYBB")) 
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 
-//$plugins->add_hook("member_login", "icycas_member_login");
 $plugins->add_hook("member_do_lostpw_start", "icycas_member_do_lostpw_start");
 $plugins->add_hook("member_do_login_start", "icycas_member_do_login_start");
 $plugins->add_hook("admin_formcontainer_end", "icycas_admin_formcontainer_end");
@@ -328,31 +327,45 @@ function icycas_member_logout_end() {
 	redirect($_SERVER['CAS_LOGOUT_URL']);
 }
 
-/* Replace the users username on the page with their display name.
- * usernames are 3 digit number such as 110, 117, 125, etc... we don't want to show those
- * so we replace them with the users display name.
- */
-function icycas_pre_output_page($page){
+
+function convert_username_to_displayname($matchpattern, $beginpattern, $endpattern, $beginout, $endout, $page){
 	global $db;
-		
-	preg_match_all("/<a href=\"[^\"]*member.php\?action=profile[^\"]*\">(\d{3,4})\<\/a>/", $page, $matches);
 	
-	//print_r($matches);
+	preg_match_all("/".$matchpattern."/", $page, $matches);
 	
 	$userids = $matches[1];
 	$patterns = array();
 	$usertitles = array();
 	foreach($userids as $key=>$id){
-		$patterns[$key] = "/\>".$id ."\<\/a\>/";
+		$patterns[$key] = "/".$beginpattern.$id .$endpattern."/";
 		$query = $db->simple_select("users", "displayname", "username=" . (int)$id);
 		$result = $db->fetch_array($query);
 		$displayname = $result['displayname'];
-		$usertitles[$key] = ">".$displayname."</a>";
+		$usertitles[$key] = $beginout.$displayname.$endout;
 	}
 	
 	$page = preg_replace($patterns, $usertitles, $page);
 	
+	unset($patterns);
+	unset($usertitles);
+	
+	return $page;
+	
+}
+
+/* Replace the users username on the page with their display name.
+ * usernames are 3 digit number such as 110, 117, 125, etc... we don't want to show those
+ * so we replace them with the users display name.
+ */
+function icycas_pre_output_page($page){
+	
+	$page = convert_username_to_displayname("<a href=\"[^\"]*member.php\?action=profile[^\"]*\">(\d{3,4})\<\/a>", "\>", "\<\/a\>", ">", "</a>", $page );
+    $page = convert_username_to_displayname("class=\"active\">Profile of (\d{3,4})\<\/span>", "class=\"active\"\>Profile of ", "\<\/span\>", "class=\"active\">Profile of ", "</span>", $page );
+    $page = convert_username_to_displayname("<strong>(\d{3,4})\'s[^\"]*\<\/strong\>", "\<strong\>", "\'s", "<strong>", "'s", $page );
+    $page = convert_username_to_displayname("<strong>Additional Info About (\d{3,4})\<\/strong>", "<strong>Additional Info About ", "\<\/strong\>", "<strong>Additional Info About ", "</strong>", $page );
+
 	return $page;
 }
+
 
 ?>

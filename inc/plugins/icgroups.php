@@ -11,12 +11,6 @@
  
 require_once MYBB_ROOT."inc/plugins/inc/icommonsapi.php";
 
-
-
-
-
-
- 
 // Disallow direct access to this file for security reasons
 if(!defined("IN_MYBB"))
 {
