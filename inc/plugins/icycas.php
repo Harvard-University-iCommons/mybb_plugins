@@ -348,6 +348,7 @@ function convert_username_to_displayname($matchpattern, $beginpattern, $endpatte
 	
 	unset($patterns);
 	unset($usertitles);
+	unset($matches);
 	
 	return $page;
 	
