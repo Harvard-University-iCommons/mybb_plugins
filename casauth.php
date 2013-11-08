@@ -12,11 +12,14 @@
  of creating user accounts. 
  
  header
+ headerinclude
  header_welcomeblock_guest
  header_welcomeblock_member
  usercp_nav_editsignature
  usercp_nav_profile
  usercp_nav_misc
+ postbit
+ footer
  
  */
 
