@@ -142,7 +142,8 @@ if(isset($_GET['ticket'])) {
 			$db->update_query("sessions", $newsession, "sid='" . $session->sid . "'");
 			$db->update_query("users", array("loginattempts" => 1), "uid='" . $user['uid'] . "'");
 			
-			my_setcookie("mybbuser", $user['uid'] . "_" . $user['loginkey'], -1, true);
+			// set cookie timeout to 20 minutes (1200 seconds)
+			my_setcookie("mybbuser", $user['uid'] . "_" . $user['loginkey'], 1200, true);
 			my_setcookie("sid", $session->sid, -1, true);
 			
 			// all myBB users have one primary group which should be set to "registered user -> 2". 
