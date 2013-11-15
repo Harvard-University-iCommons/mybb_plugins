@@ -225,7 +225,7 @@ function icycas_install() {
 	if(!$db->field_exists("externalid", "users"))
 		$db->write_query("ALTER TABLE " . TABLE_PREFIX . "users ADD externalid varchar(100)");
 	
-	if($db->table_exists(TABLE_PREFIX."userlookup")) {
+	if(!$db->table_exists(TABLE_PREFIX."userlookup")) {
 	
 		$db->drop_table(TABLE_PREFIX."userlookup");
 	
@@ -364,6 +364,9 @@ function icycas_pre_output_page($page){
     $page = convert_username_to_displayname("class=\"active\">Profile of (\d{3,4})\<\/span>", "class=\"active\"\>Profile of ", "\<\/span\>", "class=\"active\">Profile of ", "</span>", $page );
     $page = convert_username_to_displayname("<strong>(\d{3,4})\'s[^\"]*\<\/strong\>", "\<strong\>", "\'s", "<strong>", "'s", $page );
     $page = convert_username_to_displayname("<strong>Additional Info About (\d{3,4})\<\/strong>", "<strong>Additional Info About ", "\<\/strong\>", "<strong>Additional Info About ", "</strong>", $page );
+
+	#$page = convert_username_to_displayname("<strong>Send (\d{3,4}) an Email\<\/strong\>","\<strong>\Send","an Email\<\/strong\>","<strong>Send","an Email</strong>",$page);
+
 
 	return $page;
 }
