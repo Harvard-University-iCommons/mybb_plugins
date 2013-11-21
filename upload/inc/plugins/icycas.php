@@ -222,8 +222,11 @@ function icycas_deactivate() {
 function icycas_install() {
 	global $db;
 	
-	if(!$db->field_exists("externalid", "users"))
+	if(!$db->field_exists("externalid", "users")) 
 		$db->write_query("ALTER TABLE " . TABLE_PREFIX . "users ADD externalid varchar(100)");
+	
+	if(!$db->field_exists("displayname", "users"))
+	    $db->write_query("ALTER TABLE " . TABLE_PREFIX . "users ADD displayname varchar(100)");
 	
 	if(!$db->table_exists(TABLE_PREFIX."userlookup")) {
 	
